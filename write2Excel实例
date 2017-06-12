@@ -1,0 +1,202 @@
+2
+编写java类，新建一个实体类，比如我们要导出数据库的有关电脑的信息，那么就建一个Computer实体类，代码如下：
+package com.qiang.poi;
+public class Computer {
+ private int id;
+ private String name;
+ private String description;
+ private double price;
+ private double credit;
+ public int getId() {
+  return id;
+ }
+ public Computer(int id, String name, String description, double price,
+   double credit) {
+  super();
+  this.id = id;
+  this.name = name;
+  this.description = description;
+  this.price = price;
+  this.credit = credit;
+ }
+ public void setId(int id) {
+  this.id = id;
+ }
+ public String getName() {
+  return name;
+ }
+ public void setName(String name) {
+  this.name = name;
+ }
+ public String getDescription() {
+  return description;
+ }
+ public void setDescription(String description) {
+  this.description = description;
+ }
+ public double getPrice() {
+  return price;
+ }
+ public void setPrice(double price) {
+  this.price = price;
+ }
+ public double getCredit() {
+  return credit;
+ }
+ public void setCredit(double credit) {
+  this.credit = credit;
+ }
+}
+3
+新建一个写入excel的方法，如write2excel,参数可以后面边写边决定（站在一个不熟悉POI的角度)
+public static void write2Excel(){}                                 
+4
+创建操作Excel的HSSFWorkbook对象
+HSSFWorkbook excel= new HSSFWorkbook();
+5
+创建HSSFSheet对象
+Excel中的一个sheet（工作表)对应着java中的一个HSSFSheet对象，利用HSSFWorkbook对象可以创建一个HSSFSheet对象
+    如：创建一个sheet名为computer的excel  
+HSSFSheet sheet = excel.createSheet("computer");
+6
+创建第一行标题信息的HSSFRow对象
+我们都知道excel是表格，即由一行一行组成的，那么这一行在java类中就是一个HSSFRow对象，我们通过HSSFSheet对象就可以创建HSSFRow对象
+    如：创建表格中的第一行（我们常用来做标题的行)  HSSFRow firstRow = sheet.createRow(0); 注意下标从0开始
+7
+创建标题行中的HSSFCell数组
+当然，excel中每一行是由若干个单元格，我们常称为cell,它对应着java中的HSSFCell对象
+    如：创建5个单元格       HSSFCell cells[] = new HSSFCell[5]; 
+//假设我们一行有五列数据
+8
+创建标题数据，并通过HSSFCell对象的setCellValue()方法对每个单元格进行赋值
+既然单元格都准备好了，那最后是不是该填充数据了呀。对的，没错。填充数据之前，得把数据准备好吧，
+    数据：String[] titles = new String[]{"id","name","description","price","credit"};
+    插入一句话： 在这个时代，能让机器做的，尽量不让人来做，记住这句话。
+    好的，继续。现在就通过for循环来填充第一行标题的数据
+for (int i = 0; i < 5; i++) {
+   cells[0] = firstRow.createCell(i);
+   cells[0].setCellValue(titles[i]);
+  }
+9
+数据分析
+第一行标题栏创建完毕后，就准备填充我们要写入的数据吧，在java中，面向对象给我们带来的好处在这里正好体现了，没错
+把要填写的数据封装在对象中，即一行就是一个对象，n行就是一个对象列表嘛，好的，走起。
+创建对象Computer,私有属性id,name,description,price,credit,以及各属性的setter和getter方法,如步骤二所示。
+假设我们要写入excel中的数据从数据库查询出来的，最后就生成了一个List<Computer>对象computers
+10
+数据写入
+具体数据有了，又该让机器帮我们干活了，向excel中写入数据。
+for (int i = 0; i < computers.size(); i++) {
+   HSSFRow row = sheet.createRow(i + 1);
+   Computer computer = computers.get(i);
+   HSSFCell cell = row.createCell(0);
+   cell.setCellValue(computer.getId());
+   cell = row.createCell(1);
+   cell.setCellValue(computer.getName());
+   cell = row.createCell(2);
+   cell.setCellValue(computer.getDescription());
+   cell = row.createCell(3);
+   cell.setCellValue(computer.getPrice());
+   cell = row.createCell(4);
+   cell.setCellValue(computer.getCredit());
+  }
+11
+将数据真正的写入excel文件中
+做到这里，数据都写好了，最后就是把HSSFWorkbook对象excel写入文件中了。
+        OutputStream out = null;
+        try {
+            out = new FileOutputStream(file);
+            excel.write(out);
+            out.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        System.out.println("数据已经写入excel"); //温馨提示
+12
+看看我的main方法吧
+public static void main(String[] args) throws IOException {
+  File file = new File("test1.xls");
+  if(!file.exists()){
+   file.createNewFile();
+  }
+  List<Computer> computers = new ArrayList<Computer>();
+  computers.add(new Computer(1,"宏碁","笔记本电脑",3333,9.0));
+  computers.add(new Computer(2,"苹果","笔记本电脑，一体机",8888,9.6));
+  computers.add(new Computer(3,"联想","笔记本电脑，台式机",4444,9.3));
+  computers.add(new Computer(4, "华硕", "笔记本电脑,平板电脑",3555,8.6));
+  computers.add(new Computer(5, "注解", "以上价格均为捏造，如有雷同，纯属巧合", 1.0, 9.9));
+  write2excel(computers, file);
+ }
+13
+工程目录及执行main方法后的test1.xls数据展示
+
+
+
+源码分享，computer就不贴了
+package com.qiang.poi;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.List;
+import org.apache.poi.hssf.usermodel.HSSFCell;
+import org.apache.poi.hssf.usermodel.HSSFRow;
+import org.apache.poi.hssf.usermodel.HSSFSheet;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+public class ReadExcel {
+ public static void main(String[] args) throws IOException {
+  File file = new File("test1.xls");
+  if(!file.exists()){
+   file.createNewFile();
+  }
+  List<Computer> computers = new ArrayList<Computer>();
+  computers.add(new Computer(1,"宏碁","笔记本电脑",3333,9.0));
+  computers.add(new Computer(2,"苹果","笔记本电脑，一体机",8888,9.6));
+  computers.add(new Computer(3,"联想","笔记本电脑，台式机",4444,9.3));
+  computers.add(new Computer(4, "华硕", "笔记本电脑,平板电脑",3555,8.6));
+  computers.add(new Computer(5, "注解", "以上价格均为捏造，如有雷同，纯属巧合", 1.0, 9.9));
+  write2excel(computers, file);
+ }
+ 
+ public static void write2excel(List<Computer> computers,File file) {
+  HSSFWorkbook excel = new HSSFWorkbook();
+  HSSFSheet sheet = excel.createSheet("computer");
+  HSSFRow firstRow = sheet.createRow(0);
+  HSSFCell cells[] = new HSSFCell[5];
+  String[] titles = new String[] { "id", "name", "description", "price",
+    "credit" };
+  for (int i = 0; i < 5; i++) {
+   cells[0] = firstRow.createCell(i);
+   cells[0].setCellValue(titles[i]);
+  }
+  for (int i = 0; i < computers.size(); i++) {
+   HSSFRow row = sheet.createRow(i + 1);
+   Computer computer = computers.get(i);
+   HSSFCell cell = row.createCell(0);
+   cell.setCellValue(computer.getId());
+   cell = row.createCell(1);
+   cell.setCellValue(computer.getName());
+   cell = row.createCell(2);
+   cell.setCellValue(computer.getDescription());
+   cell = row.createCell(3);
+   cell.setCellValue(computer.getPrice());
+   cell = row.createCell(4);
+   cell.setCellValue(computer.getCredit());
+  }
+        OutputStream out = null;
+        try {
+            out = new FileOutputStream(file);
+            excel.write(out);
+            out.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+ }
+}
